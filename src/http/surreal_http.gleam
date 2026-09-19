@@ -27,22 +27,26 @@ fn apply_headers(
 //                                          GET /status                                          //
 //-----------------------------------------------------------------------------------------------//
 
-/// The status endpoint returns a simple response indicating the status of the SurrealDB server.
-/// https://surrealdb.com/docs/reference/rest-api/http-protocol#status
-pub fn status(connection: Connection) -> Result(Nil, Nil) {
+pub fn status_request(
+  connection: Connection,
+) -> Result(request.Request(String), Nil) {
   use req <- result.try(
     request.to(connection.endpoint <> "/status")
     |> result.replace_error(Nil),
   )
 
-  use resp <- result.try(
-    httpc.send(
-      req
-      |> request.set_method(http.Get)
-      |> apply_headers(connection),
-    )
-    |> result.replace_error(Nil),
-  )
+  req
+  |> request.set_method(http.Get)
+  |> apply_headers(connection)
+  |> Ok
+}
+
+/// The status endpoint returns a simple response indicating the status of the SurrealDB server.
+/// https://surrealdb.com/docs/reference/rest-api/http-protocol#status
+pub fn status(connection: Connection) -> Result(Nil, Nil) {
+  use req <- result.try(status_request(connection))
+
+  use resp <- result.try(httpc.send(req) |> result.replace_error(Nil))
 
   case resp.status {
     200 -> Ok(Nil)

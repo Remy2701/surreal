@@ -1,6 +1,7 @@
 import birdie
 import gleam/bool
 import gleam/dynamic/decode
+import gleam/http
 import gleam/list
 import gleam/option
 import gleam/pair
@@ -19,6 +20,39 @@ import surreal_test
 //-----------------------------------------------------------------------------------------------//
 //                                          GET /status                                          //
 //-----------------------------------------------------------------------------------------------//
+
+pub fn status_request_test() {
+  let connection =
+    surreal.connection(
+      endpoint: "http://localhost:8000",
+      namespace: "namespace",
+      database: "database",
+      username: "user",
+      password: "password",
+    )
+
+  let request =
+    connection
+    |> surreal_http.status_request()
+    |> should.be_ok()
+
+  assert request.scheme == http.Http as "Invalid scheme"
+  assert request.host == "localhost"
+  assert option.Some(8000) == request.port as "Invalid port"
+  assert request.method == http.Get as "Invalid method"
+  assert request.path == "/status" as "Invalid path"
+  assert list.contains(request.headers, #("surreal-db", "database"))
+    as "Missing Surreal-DB header"
+  assert list.contains(request.headers, #("surreal-ns", "namespace"))
+    as "Missing Surreal-NS header"
+  assert list.contains(request.headers, #(
+    "authorization",
+    connection.authorization,
+  ))
+    as "Missing Authorization header"
+
+  Nil
+}
 
 pub fn status_test() {
   use <- bool.guard(!surreal_test.run_http_test, Nil)

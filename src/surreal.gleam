@@ -27,7 +27,7 @@ pub type Connection {
 /// password are concatenated with a colon and then base64 encoded.
 fn generate_basic_authorization(username: String, password: String) -> String {
   bit_array.from_string(username <> ":" <> password)
-  |> bit_array.base64_encode(False)
+  |> bit_array.base64_encode(True)
   |> string.append("Basic ", _)
 }
 
