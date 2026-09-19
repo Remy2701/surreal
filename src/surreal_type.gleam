@@ -1,6 +1,7 @@
 import gleam/option
 import gleam/result
 import module
+import module/id_case
 
 pub type SurrealType {
   String
@@ -124,5 +125,137 @@ pub fn to_gleam_module(
         module.identifier.create("SurrealQL"),
       )
       |> module.add_import(["surreal_ql"])
+  }
+}
+
+pub fn value_to_gleam_module(
+  type_: SurrealType,
+  linked_enum: option.Option(String),
+  name: String,
+) {
+  case type_ {
+    Datetime ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Datetime"),
+      ))
+      |> module.function_call.add(
+        module.function_call.create(module.binop.access(
+          module.identifier.create("birl"),
+          module.identifier.create("to_iso8601"),
+        ))
+        |> module.function_call.add(module.identifier.create(name)),
+      )
+    Int ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Int"),
+      ))
+      |> module.function_call.add(module.identifier.create(name))
+    Float ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Float"),
+      ))
+      |> module.function_call.add(module.identifier.create(name))
+    Identifier(_) ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Raw"),
+      ))
+      |> module.function_call.add(
+        module.function_call.create(module.binop.access(
+          module.identifier.create("identifier"),
+          module.identifier.create("to_string"),
+        ))
+        |> module.function_call.add(module.identifier.create(name)),
+      )
+    Record(_) ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Raw"),
+      ))
+      |> module.function_call.add(
+        module.function_call.create(module.binop.access(
+          module.identifier.create("identifier"),
+          module.identifier.create("to_string"),
+        ))
+        |> module.function_call.add(module.binop.access(
+          module.identifier.create(name),
+          module.identifier.create("id"),
+        )),
+      )
+    String ->
+      case linked_enum {
+        option.Some(enum) ->
+          module.function_call.create(module.binop.access(
+            module.identifier.create("surreal_ql"),
+            module.identifier.create("String"),
+          ))
+          |> module.function_call.add(
+            module.function_call.create(module.binop.access(
+              module.identifier.create(id_case.namespace_only(enum)),
+              module.identifier.create(
+                id_case.string_to_snake_case(id_case.without_namespace(enum))
+                <> "_to_string",
+              ),
+            ))
+            |> module.function_call.add(module.identifier.create(name)),
+          )
+        option.None ->
+          module.function_call.create(module.binop.access(
+            module.identifier.create("surreal_ql"),
+            module.identifier.create("String"),
+          ))
+          |> module.function_call.add(module.identifier.create(name))
+      }
+    Bool ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Bool"),
+      ))
+      |> module.function_call.add(module.identifier.create(name))
+    Option(inner) ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("nullable"),
+      ))
+      |> module.function_call.add(module.identifier.create(name))
+      |> module.function_call.add(
+        module.function_definition.create()
+        |> module.function_definition.add_untyped_parameter("value")
+        |> module.function_definition.add(value_to_gleam_module(
+          inner,
+          linked_enum,
+          "value",
+        )),
+      )
+    Array(inner) ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("array"),
+      ))
+      |> module.function_call.add(module.identifier.create(name))
+      |> module.function_call.add(
+        module.function_definition.create()
+        |> module.function_definition.add_untyped_parameter("value")
+        |> module.function_definition.add(value_to_gleam_module(
+          inner,
+          linked_enum,
+          "value",
+        )),
+      )
+    Point ->
+      module.function_call.create(module.binop.access(
+        module.identifier.create("point"),
+        module.identifier.create("to_surql"),
+      ))
+      |> module.function_call.add(module.identifier.create(name))
+    Object -> module.identifier.create(name)
+    None ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("None"),
+      )
   }
 }
