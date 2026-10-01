@@ -1,20 +1,19 @@
 import gleam/dynamic/decode
 import gleam/http
-import gleam/http/request
+import gleam/http/request.{type Request}
 import gleam/httpc
 import gleam/json
 import gleam/list
 import gleam/option
 import gleam/result
 import gleam/string
-import surreal.{type Connection, type SurrealResponse}
-import surreal/identifier
+import surreal.{type Connection, type SurrealError, type SurrealResponse}
+import surreal/identifier.{type Identifier}
 import surreal_ql
 
-fn apply_headers(
-  req: request.Request(a),
-  connection: Connection,
-) -> request.Request(a) {
+/// Applies the necessary headers to the HTTP request based on the SurrealDB connection.
+/// This includes setting the "Keep-Alive", "Surreal-DB", "Surreal-NS", "Authorization", and "Accept" headers.
+fn apply_headers(req: Request(body), connection: Connection) -> Request(body) {
   req
   |> request.set_header("Keep-Alive", "timeout=5, max=1000")
   |> request.set_header("Surreal-DB", connection.database)
@@ -23,17 +22,22 @@ fn apply_headers(
   |> request.set_header("Accept", "application/json")
 }
 
+fn endpoint(
+  connection: Connection,
+  path: String,
+) -> Result(Request(String), Nil) {
+  request.to(connection.endpoint <> path)
+  |> result.replace_error(Nil)
+}
+
 //-----------------------------------------------------------------------------------------------//
 //                                          GET /status                                          //
 //-----------------------------------------------------------------------------------------------//
 
-pub fn status_request(
-  connection: Connection,
-) -> Result(request.Request(String), Nil) {
-  use req <- result.try(
-    request.to(connection.endpoint <> "/status")
-    |> result.replace_error(Nil),
-  )
+/// The status endpoint returns a simple response indicating the status of the SurrealDB server.
+/// https://surrealdb.com/docs/reference/rest-api/http-protocol#status
+pub fn status_request(connection: Connection) -> Result(Request(String), Nil) {
+  use req <- result.try(endpoint(connection, "/status"))
 
   req
   |> request.set_method(http.Get)
@@ -60,20 +64,21 @@ pub fn status(connection: Connection) -> Result(Nil, Nil) {
 
 /// The health endpoint returns a simple response indicating the health of the SurrealDB server.
 /// https://surrealdb.com/docs/reference/rest-api/http-protocol#health
-pub fn health(connection: Connection) -> Result(Nil, Nil) {
-  use req <- result.try(
-    request.to(connection.endpoint <> "/health")
-    |> result.replace_error(Nil),
-  )
+pub fn health_request(connection: Connection) -> Result(Request(String), Nil) {
+  use req <- result.try(endpoint(connection, "/health"))
 
-  use resp <- result.try(
-    httpc.send(
-      req
-      |> request.set_method(http.Get)
-      |> apply_headers(connection),
-    )
-    |> result.replace_error(Nil),
-  )
+  req
+  |> request.set_method(http.Get)
+  |> apply_headers(connection)
+  |> Ok
+}
+
+/// The health endpoint returns a simple response indicating the health of the SurrealDB server.
+/// https://surrealdb.com/docs/reference/rest-api/http-protocol#health
+pub fn health(connection: Connection) -> Result(Nil, Nil) {
+  use req <- result.try(health_request(connection))
+
+  use resp <- result.try(httpc.send(req) |> result.replace_error(Nil))
 
   case resp.status {
     200 -> Ok(Nil)
@@ -87,20 +92,21 @@ pub fn health(connection: Connection) -> Result(Nil, Nil) {
 
 /// The ready endpoint returns a simple response indicating the readiness of the SurrealDB server.
 /// https://surrealdb.com/docs/reference/rest-api/http-protocol#ready
-pub fn ready(connection: Connection) -> Result(Nil, Nil) {
-  use req <- result.try(
-    request.to(connection.endpoint <> "/ready")
-    |> result.replace_error(Nil),
-  )
+pub fn ready_request(connection: Connection) -> Result(Request(String), Nil) {
+  use req <- result.try(endpoint(connection, "/ready"))
 
-  use resp <- result.try(
-    httpc.send(
-      req
-      |> request.set_method(http.Get)
-      |> apply_headers(connection),
-    )
-    |> result.replace_error(Nil),
-  )
+  req
+  |> request.set_method(http.Get)
+  |> apply_headers(connection)
+  |> Ok
+}
+
+/// The ready endpoint returns a simple response indicating the readiness of the SurrealDB server.
+/// https://surrealdb.com/docs/reference/rest-api/http-protocol#ready
+pub fn ready(connection: Connection) -> Result(Nil, Nil) {
+  use req <- result.try(ready_request(connection))
+
+  use resp <- result.try(httpc.send(req) |> result.replace_error(Nil))
 
   case resp.status {
     200 -> Ok(Nil)
@@ -114,20 +120,26 @@ pub fn ready(connection: Connection) -> Result(Nil, Nil) {
 
 /// The version endpoint returns the current version of the SurrealDB server.
 /// https://surrealdb.com/docs/reference/rest-api/http-protocol#version
-pub fn version(connection: Connection) -> Result(String, surreal.SurrealError) {
+pub fn version_request(
+  connection: Connection,
+) -> Result(Request(String), SurrealError) {
   use req <- result.try(
-    request.to(connection.endpoint <> "/version")
+    endpoint(connection, "/version")
     |> result.replace_error(surreal.InvalidUrl),
   )
 
-  use resp <- result.try(
-    httpc.send(
-      req
-      |> request.set_method(http.Get)
-      |> apply_headers(connection),
-    )
-    |> result.map_error(surreal.HttpError),
-  )
+  req
+  |> request.set_method(http.Get)
+  |> apply_headers(connection)
+  |> Ok
+}
+
+/// The version endpoint returns the current version of the SurrealDB server.
+/// https://surrealdb.com/docs/reference/rest-api/http-protocol#version
+pub fn version(connection: Connection) -> Result(String, SurrealError) {
+  use req <- result.try(version_request(connection))
+
+  use resp <- result.try(httpc.send(req) |> result.map_error(surreal.HttpError))
 
   case resp.status {
     200 -> Ok(resp.body)
@@ -145,8 +157,70 @@ pub fn version(connection: Connection) -> Result(String, surreal.SurrealError) {
 //                                         POST /signin                                          //
 //-----------------------------------------------------------------------------------------------//
 
+pub type AuthenticationBody {
+  AuthenticationBody(
+    db: String,
+    ns: String,
+    ac: String,
+    email: String,
+    password: String,
+    data: List(#(String, surreal_ql.SurrealQL)),
+  )
+}
+
+pub fn authentication_body(
+  connection: Connection,
+  table: String,
+  email: String,
+  password: String,
+  content: List(#(String, surreal_ql.SurrealQL)),
+) -> AuthenticationBody {
+  AuthenticationBody(
+    db: connection.database,
+    ns: connection.namespace,
+    ac: table,
+    email: email,
+    password: password,
+    data: content,
+  )
+}
+
+fn authentication_body_to_surql(
+  body: AuthenticationBody,
+) -> surreal_ql.SurrealQL {
+  surreal_ql.Object([
+    #("db", surreal_ql.String(body.db)),
+    #("ns", surreal_ql.String(body.ns)),
+    #("ac", surreal_ql.String(body.ac)),
+    #("email", surreal_ql.String(body.email)),
+    #("password", surreal_ql.String(body.password)),
+    ..body.data
+  ])
+}
+
 /// Access an existing account inside the SurrealDB database server.
-/// 
+/// https://surrealdb.com/docs/reference/rest-api/http-protocol#signin
+pub fn signin_request(
+  connection: Connection,
+  body: AuthenticationBody,
+) -> Result(Request(String), SurrealError) {
+  use req <- result.try(
+    endpoint(connection, "/signin")
+    |> result.replace_error(surreal.InvalidUrl),
+  )
+
+  req
+  |> request.set_method(http.Post)
+  |> apply_headers(connection)
+  |> request.set_body(
+    body
+    |> authentication_body_to_surql
+    |> surreal_ql.to_string(),
+  )
+  |> Ok
+}
+
+/// Access an existing account inside the SurrealDB database server.
 /// https://surrealdb.com/docs/reference/rest-api/http-protocol#signin
 pub fn signin(
   connection: Connection,
@@ -156,29 +230,11 @@ pub fn signin(
   content: List(#(String, surreal_ql.SurrealQL)),
 ) -> Result(String, surreal.SurrealError) {
   use req <- result.try(
-    request.to(connection.endpoint <> "/signin")
-    |> result.replace_error(surreal.InvalidUrl),
+    authentication_body(connection, table, email, password, content)
+    |> signin_request(connection, _),
   )
 
-  use resp <- result.try(
-    httpc.send(
-      req
-      |> request.set_method(http.Post)
-      |> apply_headers(connection)
-      |> request.set_body(
-        surreal_ql.Object([
-          #("db", surreal_ql.String(connection.database)),
-          #("ns", surreal_ql.String(connection.namespace)),
-          #("ac", surreal_ql.String(table)),
-          #("email", surreal_ql.String(email)),
-          #("password", surreal_ql.String(password)),
-          ..content
-        ])
-        |> surreal_ql.to_string(),
-      ),
-    )
-    |> result.map_error(surreal.HttpError),
-  )
+  use resp <- result.try(httpc.send(req) |> result.map_error(surreal.HttpError))
 
   json.parse(resp.body, surreal.auth_result_decoder())
   |> result.map_error(surreal.FailedToDecode)
@@ -190,7 +246,28 @@ pub fn signin(
 //-----------------------------------------------------------------------------------------------//
 
 /// Create an account inside the SurrealDB database server.
-/// 
+/// https://surrealdb.com/docs/reference/rest-api/http-protocol#signup
+pub fn signup_request(
+  connection: Connection,
+  body: AuthenticationBody,
+) -> Result(Request(String), SurrealError) {
+  use req <- result.try(
+    endpoint(connection, "/signup")
+    |> result.replace_error(surreal.InvalidUrl),
+  )
+
+  req
+  |> request.set_method(http.Post)
+  |> apply_headers(connection)
+  |> request.set_body(
+    body
+    |> authentication_body_to_surql
+    |> surreal_ql.to_string(),
+  )
+  |> Ok
+}
+
+/// Create an account inside the SurrealDB database server.
 /// https://surrealdb.com/docs/reference/rest-api/http-protocol#signup
 pub fn signup(
   connection: Connection,
@@ -200,28 +277,11 @@ pub fn signup(
   content: List(#(String, surreal_ql.SurrealQL)),
 ) -> Result(String, surreal.SurrealError) {
   use req <- result.try(
-    request.to(connection.endpoint <> "/signup")
-    |> result.replace_error(surreal.InvalidUrl),
+    authentication_body(connection, table, email, password, content)
+    |> signup_request(connection, _),
   )
-  use resp <- result.try(
-    httpc.send(
-      req
-      |> request.set_method(http.Post)
-      |> apply_headers(connection)
-      |> request.set_body(
-        surreal_ql.Object([
-          #("db", surreal_ql.String(connection.database)),
-          #("ns", surreal_ql.String(connection.namespace)),
-          #("ac", surreal_ql.String(table)),
-          #("email", surreal_ql.String(email)),
-          #("password", surreal_ql.String(password)),
-          ..content
-        ])
-        |> surreal_ql.to_string(),
-      ),
-    )
-    |> result.map_error(surreal.HttpError),
-  )
+
+  use resp <- result.try(httpc.send(req) |> result.map_error(surreal.HttpError))
 
   json.parse(resp.body, surreal.auth_result_decoder())
   |> result.map_error(surreal.FailedToDecode)
@@ -320,9 +380,9 @@ pub fn post_table(
 pub fn get_record_raw(
   connection: Connection,
   table: String,
-  id: identifier.Identifier(a),
+  id: Identifier(a),
   decoder: decode.Decoder(a),
-) -> Result(List(SurrealResponse(List(a))), surreal.SurrealError) {
+) -> Result(List(SurrealResponse(List(a))), SurrealError) {
   use req <- result.try(
     request.to(
       connection.endpoint <> "/key/" <> table <> "/" <> identifier.to_string(id),
