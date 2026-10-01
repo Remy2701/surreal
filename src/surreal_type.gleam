@@ -37,7 +37,7 @@ pub fn from_string(str: String) -> Result(SurrealType, String) {
 
 pub fn to_gleam_type_str(kind: SurrealType) -> String {
   case kind {
-    Datetime -> "birl.Time"
+    Datetime -> "timestamp.Timestamp"
     Int -> "Int"
     Float -> "Float"
     Identifier(name) -> "identifier.Identifier(" <> name <> ")"
@@ -76,10 +76,10 @@ pub fn to_gleam_module(
   case type_ {
     Datetime ->
       module.binop.access(
-        module.identifier.create("birl"),
-        module.identifier.create("Time"),
+        module.identifier.create("timestamp"),
+        module.identifier.create("Timestamp"),
       )
-      |> module.add_import(["birl"])
+      |> module.add_import(["gleam", "time", "timestamp"])
     Int -> module.identifier.create("Int")
     Float -> module.identifier.create("Float")
     Identifier(inner) ->
@@ -141,11 +141,17 @@ pub fn value_to_gleam_module(
       ))
       |> module.function_call.add(
         module.function_call.create(module.binop.access(
-          module.identifier.create("birl"),
-          module.identifier.create("to_iso8601"),
+          module.identifier.create("timestamp"),
+          module.identifier.create("to_rfc3339"),
         ))
-        |> module.function_call.add(module.identifier.create(name)),
+        |> module.function_call.add(module.identifier.create(name))
+        |> module.function_call.add(module.binop.access(
+          module.identifier.create("calendar"),
+          module.identifier.create("utc_offset"),
+        )),
       )
+      |> module.add_import(["gleam", "time", "timestamp"])
+      |> module.add_import(["gleam", "time", "calendar"])
     Int ->
       module.function_call.create(module.binop.access(
         module.identifier.create("surreal_ql"),

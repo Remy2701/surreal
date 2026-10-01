@@ -1,4 +1,3 @@
-import birl
 import gjwt
 import gjwt/header
 import gjwt/key
@@ -6,14 +5,16 @@ import gjwt/payload
 import gleam/bool
 import gleam/dynamic
 import gleam/dynamic/decode
+import gleam/float
 import gleam/order
 import gleam/result
+import gleam/time/timestamp
 
 pub type Payload {
   Payload(
-    issued_at: birl.Time,
-    not_valid_before: birl.Time,
-    expire_at: birl.Time,
+    issued_at: timestamp.Timestamp,
+    not_valid_before: timestamp.Timestamp,
+    expire_at: timestamp.Timestamp,
     issuer: String,
     jwt_id: String,
     namespace: String,
@@ -23,8 +24,8 @@ pub type Payload {
   )
 }
 
-fn int_time_decoder() -> decode.Decoder(birl.Time) {
-  decode.map(decode.int, birl.from_unix)
+fn int_time_decoder() -> decode.Decoder(timestamp.Timestamp) {
+  decode.map(decode.int, timestamp.from_unix_seconds)
 }
 
 pub fn verify_jwt(jwt: String, key: key.Key) -> Result(Payload, Nil) {
@@ -71,12 +72,12 @@ pub fn verify_jwt(jwt: String, key: key.Key) -> Result(Payload, Nil) {
   )
 
   use <- bool.guard(
-    birl.compare(birl.utc_now(), not_valid_before) == order.Lt,
+    timestamp.compare(timestamp.system_time(), not_valid_before) == order.Lt,
     Error(Nil),
   )
 
   use <- bool.guard(
-    birl.compare(birl.utc_now(), expire_at) == order.Gt,
+    timestamp.compare(timestamp.system_time(), expire_at) == order.Gt,
     Error(Nil),
   )
 
@@ -98,15 +99,30 @@ pub fn generate_jwt(payload: Payload, key: key.Key) -> String {
     payload.new()
     |> payload.add_claim(#(
       "iat",
-      dynamic.int(payload.issued_at |> birl.to_unix),
+      dynamic.int(
+        payload.issued_at
+        |> timestamp.to_unix_seconds
+        |> float.floor
+        |> float.round,
+      ),
     ))
     |> payload.add_claim(#(
       "nbf",
-      dynamic.int(payload.not_valid_before |> birl.to_unix),
+      dynamic.int(
+        payload.not_valid_before
+        |> timestamp.to_unix_seconds
+        |> float.floor
+        |> float.round,
+      ),
     ))
     |> payload.add_claim(#(
       "exp",
-      dynamic.int(payload.expire_at |> birl.to_unix),
+      dynamic.int(
+        payload.expire_at
+        |> timestamp.to_unix_seconds
+        |> float.floor
+        |> float.round,
+      ),
     ))
     |> payload.add_claim(#("iss", dynamic.string(payload.issuer)))
     |> payload.add_claim(#("jti", dynamic.string(payload.jwt_id)))

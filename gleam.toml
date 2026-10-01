@@ -10,7 +10,6 @@ gleam_httpc = ">= 5.0.0 and < 6.0.0"
 gleam_http = ">= 4.3.0 and < 5.0.0"
 gleam_json = ">= 3.1.0 and < 4.0.0"
 json_value = ">= 1.0.0 and < 2.0.0"
-birl = ">= 2.0.0 and < 3.0.0"
 collie = ">= 2.0.0 and < 3.0.0"
 gleam_crypto = ">= 1.6.0 and < 2.0.0"
 gjwt = ">= 2.0.1 and < 3.0.0"
@@ -18,6 +17,7 @@ sceall = ">= 1.1.0 and < 2.0.0"
 exception = ">= 2.1.0 and < 3.0.0"
 str = ">= 2.1.1 and < 3.0.0"
 module = { git = "https://github.com/Remy2701/module.git", ref = "main" }
+gleam_time = ">= 1.11.0 and < 2.0.0"
 
 [dev_dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

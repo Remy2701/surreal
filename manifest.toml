@@ -49,7 +49,6 @@ packages = [
 
 [requirements]
 birdie = { version = ">= 2.0.2 and < 3.0.0" }
-birl = { version = ">= 2.0.0 and < 3.0.0" }
 collie = { version = ">= 2.0.0 and < 3.0.0" }
 exception = { version = ">= 2.1.0 and < 3.0.0" }
 gjwt = { version = ">= 2.0.1 and < 3.0.0" }
@@ -60,6 +59,7 @@ gleam_httpc = { version = ">= 5.0.0 and < 6.0.0" }
 gleam_json = { version = ">= 3.1.0 and < 4.0.0" }
 gleam_otp = { version = ">= 1.2.0 and < 2.0.0" }
 gleam_stdlib = { version = ">= 1.0.0 and < 2.0.0" }
+gleam_time = { version = ">= 1.11.0 and < 2.0.0" }
 gleeunit = { version = ">= 1.0.0 and < 2.0.0" }
 json_value = { version = ">= 1.0.0 and < 2.0.0" }
 module = { git = "https://github.com/Remy2701/module.git", ref = "main" }
