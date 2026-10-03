@@ -6,7 +6,7 @@ import surreal_ql
 
 /// The table specifications for a given database table. This is a blueprint 
 /// to work with both gleam's decoder and custom decoder (e.g. backstage)
-pub type TableSpec(a, decoder) {
+pub type TableSpec(a, serializer) {
   TableSpec(
     table_name: String,
     query_string: String,
@@ -14,7 +14,7 @@ pub type TableSpec(a, decoder) {
     id: fn(a) -> identifier.Identifier(a),
     to_surql: fn(a) -> surreal_ql.SurrealQL,
     to_json: fn(a) -> json.Json,
-    decoder: fn() -> decoder,
+    serializer: fn() -> serializer,
   )
 }
 
