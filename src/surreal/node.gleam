@@ -1,9 +1,8 @@
-import gleam/bool
 import gleam/float
-import gleam/int
 import gleam/list
 import gleam/option.{type Option}
 import gleam/string
+import module
 import surreal_ql
 import surreal_type
 
@@ -322,23 +321,88 @@ pub fn to_string(node: Node) -> String {
   }
 }
 
-fn surreal_type_to_gleam_code(type_: surreal_type.SurrealType) -> String {
+fn surreal_type_to_module(type_: surreal_type.SurrealType) -> module.Module {
   case type_ {
-    surreal_type.Int -> "surreal_type.Int"
-    surreal_type.String -> "surreal_type.String"
-    surreal_type.Float -> "surreal_type.Float"
+    surreal_type.Int ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Int"),
+      )
+      |> module.add_import(["surreal_type"])
+    surreal_type.String ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("String"),
+      )
+      |> module.add_import(["surreal_type"])
+    surreal_type.Float ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Float"),
+      )
+      |> module.add_import(["surreal_type"])
     surreal_type.Identifier(name) ->
-      "surreal_type.Identifier(\"" <> name <> "\")"
-    surreal_type.Record(name) -> "surreal_type.Record(\"" <> name <> "\")"
-    surreal_type.Datetime -> "surreal_type.Datetime"
-    surreal_type.Bool -> "surreal_type.Bool"
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Identifier"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.string(name))
+      |> module.add_import(["surreal_type"])
+    surreal_type.Record(name) ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Record"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.string(name))
+      |> module.add_import(["surreal_type"])
+    surreal_type.Datetime ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Datetime"),
+      )
+      |> module.add_import(["surreal_type"])
+    surreal_type.Bool ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Bool"),
+      )
+      |> module.add_import(["surreal_type"])
     surreal_type.Option(inner) ->
-      "surreal_type.Option(" <> surreal_type_to_gleam_code(inner) <> ")"
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Option"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(surreal_type_to_module(inner))
+      |> module.add_import(["surreal_type"])
     surreal_type.Array(inner) ->
-      "surreal_type.Array(" <> surreal_type_to_gleam_code(inner) <> ")"
-    surreal_type.Point -> "surreal_type.Point"
-    surreal_type.Object -> "surreal_type.Object"
-    surreal_type.None -> "surreal_type.None"
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Array"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(surreal_type_to_module(inner))
+      |> module.add_import(["surreal_type"])
+    surreal_type.Point ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Point"),
+      )
+      |> module.add_import(["surreal_type"])
+    surreal_type.Object ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("Object"),
+      )
+      |> module.add_import(["surreal_type"])
+    surreal_type.None ->
+      module.binop.access(
+        module.identifier.create("surreal_type"),
+        module.identifier.create("None"),
+      )
+      |> module.add_import(["surreal_type"])
   }
 }
 
@@ -431,64 +495,157 @@ pub fn replace_variables(
   }
 }
 
-fn surreal_value_to_gleam_code(value: surreal_ql.SurrealQL) -> String {
+fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
   case value {
-    surreal_ql.String(value) -> "surreal_ql.String(\"" <> value <> "\")"
-    surreal_ql.Int(value) -> "surreal_ql.Int(" <> int.to_string(value) <> ")"
-    surreal_ql.Float(value) ->
-      "surreal_ql.Float(" <> float.to_string(value) <> ")"
-    surreal_ql.Bool(True) -> "surreal_ql.Bool(True)"
-    surreal_ql.Bool(False) -> "surreal_ql.Bool(False)"
-    surreal_ql.Datetime(date) -> "surreal_ql.Datetime(\"" <> date <> "\")"
-    surreal_ql.Null -> "surreal_ql.Null"
-    surreal_ql.Object(value) ->
-      "surreal_ql.Object(["
-      <> string.join(
-        list.map(value, fn(value) {
-          "#(\""
-          <> value.0
-          <> "\", "
-          <> surreal_value_to_gleam_code(value.1)
-          <> ")"
-        }),
-        ",",
+    surreal_ql.String(value) ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("String"),
       )
-      <> "])"
-    surreal_ql.Raw(value) -> "surreal_ql.Raw(\"" <> value <> "\")"
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.string(value))
+      |> module.add_import(["surreal_ql"])
+    surreal_ql.Int(value) ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Int"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.int(value))
+      |> module.add_import(["surreal_ql"])
+    surreal_ql.Float(value) ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Float"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.float(value))
+      |> module.add_import(["surreal_ql"])
+    surreal_ql.Bool(value) ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Bool"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.bool(value))
+      |> module.add_import(["surreal_ql"])
+    surreal_ql.Datetime(value) ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Datetime"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.string(value))
+      |> module.add_import(["surreal_ql"])
+    surreal_ql.Null ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Null"),
+      )
+      |> module.add_import(["surreal_ql"])
+    surreal_ql.Object(value) ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Object"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(
+        module.literal.list(
+          list.map(value, fn(value) {
+            module.literal.tuple([
+              module.literal.string(value.0),
+              surreal_value_to_module(value.1),
+            ])
+          }),
+        ),
+      )
+      |> module.add_import(["surreal_ql"])
+    surreal_ql.Raw(value) ->
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Raw"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.string(value))
+      |> module.add_import(["surreal_ql"])
     surreal_ql.Array(values) ->
-      "surreal_ql.Array(["
-      <> string.join(list.map(values, surreal_value_to_gleam_code), ",")
-      <> "])"
+      module.binop.access(
+        module.identifier.create("surreal_ql"),
+        module.identifier.create("Array"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(
+        module.literal.list(list.map(values, surreal_value_to_module)),
+      )
+      |> module.add_import(["surreal_ql"])
   }
 }
 
-pub fn to_gleam_code(node: Node) -> String {
+fn option_of(
+  value: option.Option(t),
+  to_module: fn(t) -> module.Module,
+) -> module.Module {
+  case value {
+    option.Some(value) ->
+      module.binop.access(
+        module.identifier.create("option"),
+        module.identifier.create("Some"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(to_module(value))
+      |> module.add_import(["gleam", "option"])
+    option.None ->
+      module.binop.access(
+        module.identifier.create("option"),
+        module.identifier.create("None"),
+      )
+      |> module.add_import(["gleam", "option"])
+  }
+}
+
+pub fn to_module(node: Node) -> module.Module {
   case node {
     DefineNormalTable(name:, schemafull:, permissions:, as_:) ->
-      "node.DefineNormalTable(name: \""
-      <> name
-      <> "\", schemafull: "
-      <> bool.to_string(schemafull)
-      <> ", permissions: "
-      <> to_gleam_code(permissions)
-      <> ", as_: "
-      <> option.map(as_, fn(node) {
-        "option.Some(" <> to_gleam_code(node) <> ")"
-      })
-      |> option.unwrap("option.None")
-      <> ")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("DefineNormalTable"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "name",
+        module.literal.string(name),
+      )
+      |> module.function_call.add_with_alias(
+        "schemafull",
+        module.literal.bool(schemafull),
+      )
+      |> module.function_call.add_with_alias(
+        "permissions",
+        to_module(permissions),
+      )
+      |> module.function_call.add_with_alias("as_", option_of(as_, to_module))
+      |> module.add_import(["surreal", "node"])
     DefineRelationTable(name:, schemafull:, permissions:, in:, out:) ->
-      "node.DefineRelationTable(name: \""
-      <> name
-      <> "\", schemafull: "
-      <> bool.to_string(schemafull)
-      <> ", permissions: "
-      <> to_gleam_code(permissions)
-      <> ", in: \""
-      <> in
-      <> "\", out: \""
-      <> out
-      <> "\")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("DefineRelationTable"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "name",
+        module.literal.string(name),
+      )
+      |> module.function_call.add_with_alias(
+        "schemafull",
+        module.literal.bool(schemafull),
+      )
+      |> module.function_call.add_with_alias(
+        "permissions",
+        to_module(permissions),
+      )
+      |> module.function_call.add_with_alias("in", module.literal.string(in))
+      |> module.function_call.add_with_alias("out", module.literal.string(out))
+      |> module.add_import(["surreal", "node"])
     DefineField(
       name:,
       table:,
@@ -498,201 +655,348 @@ pub fn to_gleam_code(node: Node) -> String {
       permissions:,
       flexible:,
     ) ->
-      "node.DefineField(name: "
-      <> to_gleam_code(name)
-      <> ", table: \""
-      <> table
-      <> "\", type_: "
-      <> surreal_type_to_gleam_code(type_)
-      <> ", default: "
-      <> option.map(default, fn(node) {
-        "option.Some(" <> to_gleam_code(node) <> ")"
-      })
-      |> option.unwrap("option.None")
-      <> ", assert_: "
-      <> option.map(assert_, fn(node) {
-        "option.Some(" <> to_gleam_code(node) <> ")"
-      })
-      |> option.unwrap("option.None")
-      <> ", permissions: "
-      <> option.map(permissions, fn(node) {
-        "option.Some(" <> to_gleam_code(node) <> ")"
-      })
-      |> option.unwrap("option.None")
-      <> ", flexible: "
-      <> bool.to_string(flexible)
-      <> ")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("DefineField"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias("name", to_module(name))
+      |> module.function_call.add_with_alias(
+        "table",
+        module.literal.string(table),
+      )
+      |> module.function_call.add_with_alias(
+        "type_",
+        surreal_type_to_module(type_),
+      )
+      |> module.function_call.add_with_alias(
+        "default",
+        option_of(default, to_module),
+      )
+      |> module.function_call.add_with_alias(
+        "assert_",
+        option_of(assert_, to_module),
+      )
+      |> module.function_call.add_with_alias(
+        "permissions",
+        option_of(permissions, to_module),
+      )
+      |> module.function_call.add_with_alias(
+        "flexible",
+        module.literal.bool(flexible),
+      )
+      |> module.add_import(["surreal", "node"])
     DefineIndex(name:, table:, fields:, unique:) ->
-      "node.DefineIndex(name: \""
-      <> name
-      <> "\", table: \""
-      <> table
-      <> "\", fields: ["
-      <> string.join(
-        list.map(fields, fn(field) { "\"" <> field <> "\"" }),
-        ", ",
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("DefineIndex"),
       )
-      <> "], unique: "
-      <> bool.to_string(unique)
-      <> ")"
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "name",
+        module.literal.string(name),
+      )
+      |> module.function_call.add_with_alias(
+        "table",
+        module.literal.string(table),
+      )
+      |> module.function_call.add_with_alias(
+        "fields",
+        module.literal.list(list.map(fields, module.literal.string)),
+      )
+      |> module.function_call.add_with_alias(
+        "unique",
+        module.literal.bool(unique),
+      )
+      |> module.add_import(["surreal", "node"])
     FunctionCall(lhs:, rhs:, arguments:) ->
-      "node.FunctionCall(lhs: "
-      <> case lhs {
-        option.Some(lhs) -> "option.Some(\"" <> lhs <> "\")"
-        option.None -> "option.None"
-      }
-      <> ", rhs: \""
-      <> rhs
-      <> "\", arguments: ["
-      <> string.join(list.map(arguments, to_gleam_code), ", ")
-      <> "])"
-    Self -> "node.Self"
-    None -> "node.None"
-    Full -> "node.Full"
-    All -> "node.All"
-    Number(value) -> "node.Number(" <> float.to_string(value) <> ")"
-    Parameter(value) -> "node.Parameter(\"" <> value <> "\")"
-    Identifier(value) -> "node.Identifier(\"" <> value <> "\")"
-    Value(value) -> "node.Value(" <> surreal_value_to_gleam_code(value) <> ")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("FunctionCall"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "lhs",
+        option_of(lhs, module.literal.string),
+      )
+      |> module.function_call.add_with_alias("rhs", module.literal.string(rhs))
+      |> module.function_call.add_with_alias(
+        "arguments",
+        module.literal.list(list.map(arguments, to_module)),
+      )
+      |> module.add_import(["surreal", "node"])
+    Self ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Self"),
+      )
+      |> module.add_import(["surreal", "node"])
+    None ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("None"),
+      )
+      |> module.add_import(["surreal", "node"])
+    Full ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Full"),
+      )
+      |> module.add_import(["surreal", "node"])
+    All ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("All"),
+      )
+      |> module.add_import(["surreal", "node"])
+    Number(value) ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Number"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.float(value))
+      |> module.add_import(["surreal", "node"])
+    Parameter(value) ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Parameter"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.string(value))
+      |> module.add_import(["surreal", "node"])
+    Identifier(value) ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Identifier"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.literal.string(value))
+      |> module.add_import(["surreal", "node"])
+    Value(value) ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Value"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(surreal_value_to_module(value))
+      |> module.add_import(["surreal", "node"])
     Object(fields) ->
-      "node.Object(["
-      <> string.join(
-        list.map(fields, fn(value) {
-          let #(key, value) = value
-          "#(\"" <> key <> "\", " <> to_gleam_code(value) <> ")"
-        }),
-        ", ",
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Object"),
       )
-      <> "])"
+      |> module.function_call.create()
+      |> module.function_call.add(
+        module.literal.list(
+          list.map(fields, fn(field) {
+            let #(key, value) = field
+            module.literal.tuple([module.literal.string(key), to_module(value)])
+          }),
+        ),
+      )
+      |> module.add_import(["surreal", "node"])
     Array(fields) ->
-      "node.Array(["
-      <> string.join(list.map(fields, to_gleam_code), ", ")
-      <> "])"
-    Select(fields:, only:, table:, where:, order:, limit:, group_all:) ->
-      "node.Select(fields: ["
-      <> string.join(
-        list.map(fields, fn(field) {
-          "node.SelectField(field: "
-          <> to_gleam_code(field.field)
-          <> ", alias: "
-          <> option.map(field.alias, fn(alias) {
-            "option.Some(\"" <> alias <> "\")"
-          })
-          |> option.unwrap("option.None")
-          <> ", value: "
-          <> bool.to_string(field.value)
-          <> ")"
-        }),
-        ", ",
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Array"),
       )
-      <> "], only: "
-      <> bool.to_string(only)
-      <> ", table: \""
-      <> table
-      <> "\", where: "
-      <> option.map(where, fn(node) {
-        "option.Some(" <> to_gleam_code(node) <> ")"
-      })
-      |> option.unwrap("option.None")
-      <> ", order: "
-      <> option.map(order, fn(order) {
-        "option.Some(["
-        <> list.map(order, fn(entry) {
-          let #(field, direction) = entry
-          "#("
-          <> to_gleam_code(field)
-          <> ", "
-          <> case direction {
-            Ascending -> "node.Ascending"
-            Descending -> "node.Descending"
-          }
-          <> ")"
-        })
-        |> string.join(", ")
-        <> "])"
-      })
-      |> option.unwrap("option.None")
-      <> ", limit: "
-      <> option.map(limit, fn(node) {
-        "option.Some(" <> to_gleam_code(node) <> ")"
-      })
-      |> option.unwrap("option.None")
-      <> ", group_all: "
-      <> bool.to_string(group_all)
-      <> ")"
+      |> module.function_call.create()
+      |> module.function_call.add(
+        module.literal.list(list.map(fields, to_module)),
+      )
+      |> module.add_import(["surreal", "node"])
+    Select(fields:, only:, table:, where:, order:, limit:, group_all:) ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Select"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "fields",
+        module.literal.list(
+          list.map(fields, fn(field) {
+            module.binop.access(
+              module.identifier.create("node"),
+              module.identifier.create("SelectField"),
+            )
+            |> module.function_call.create()
+            |> module.function_call.add_with_alias(
+              "field",
+              to_module(field.field),
+            )
+            |> module.function_call.add_with_alias(
+              "alias",
+              option_of(field.alias, module.literal.string),
+            )
+            |> module.function_call.add_with_alias(
+              "value",
+              module.literal.bool(field.value),
+            )
+          }),
+        ),
+      )
+      |> module.function_call.add_with_alias("only", module.literal.bool(only))
+      |> module.function_call.add_with_alias(
+        "table",
+        module.literal.string(table),
+      )
+      |> module.function_call.add_with_alias(
+        "where",
+        option_of(where, to_module),
+      )
+      |> module.function_call.add_with_alias(
+        "order",
+        option_of(order, fn(order) {
+          module.literal.list(
+            list.map(order, fn(entry) {
+              let #(field, direction) = entry
+              module.literal.tuple([
+                to_module(field),
+                module.binop.access(
+                  module.identifier.create("node"),
+                  module.identifier.create(case direction {
+                    Ascending -> "Ascending"
+                    Descending -> "Descending"
+                  }),
+                ),
+              ])
+            }),
+          )
+        }),
+      )
+      |> module.function_call.add_with_alias(
+        "limit",
+        option_of(limit, to_module),
+      )
+      |> module.function_call.add_with_alias(
+        "group_all",
+        module.literal.bool(group_all),
+      )
+      |> module.add_import(["surreal", "node"])
     BinaryOperator(lhs:, operator:, rhs:) ->
-      "node.BinaryOperator(lhs: "
-      <> to_gleam_code(lhs)
-      <> ", operator: "
-      <> case operator {
-        Equal -> "node.Equal"
-        NotEqual -> "node.NotEqual"
-        GreaterThan -> "node.GreaterThan"
-        LessThan -> "node.LessThan"
-        GreaterThanOrEqual -> "node.GreaterThanOrEqual"
-        LessThanOrEqual -> "node.LessThanOrEqual"
-        Access -> "node.Access"
-        Inside -> "node.Inside"
-        RelationTo -> "node.RelationTo"
-        RelationFrom -> "node.RelationFrom"
-        RelationToFrom -> "node.RelationToFrom"
-        Indexing -> "node.Indexing"
-        And -> "node.And"
-        Or -> "node.Or"
-      }
-      <> ", rhs: "
-      <> to_gleam_code(rhs)
-      <> ")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("BinaryOperator"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias("lhs", to_module(lhs))
+      |> module.function_call.add_with_alias(
+        "operator",
+        module.binop.access(
+          module.identifier.create("node"),
+          module.identifier.create(case operator {
+            Equal -> "Equal"
+            NotEqual -> "NotEqual"
+            GreaterThan -> "GreaterThan"
+            LessThan -> "LessThan"
+            GreaterThanOrEqual -> "GreaterThanOrEqual"
+            LessThanOrEqual -> "LessThanOrEqual"
+            Access -> "Access"
+            Inside -> "Inside"
+            RelationTo -> "RelationTo"
+            RelationFrom -> "RelationFrom"
+            RelationToFrom -> "RelationToFrom"
+            Indexing -> "Indexing"
+            And -> "And"
+            Or -> "Or"
+          }),
+        ),
+      )
+      |> module.function_call.add_with_alias("rhs", to_module(rhs))
+      |> module.add_import(["surreal", "node"])
     If(condition:, then_:, else_:) ->
-      "node.If(condition: "
-      <> to_gleam_code(condition)
-      <> ", then_: "
-      <> to_gleam_code(then_)
-      <> ", else_: "
-      <> to_gleam_code(else_)
-      <> ")"
-    WrappedNode(node) -> "node.WrappedNode(node: " <> to_gleam_code(node) <> ")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("If"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias("condition", to_module(condition))
+      |> module.function_call.add_with_alias("then_", to_module(then_))
+      |> module.function_call.add_with_alias("else_", to_module(else_))
+      |> module.add_import(["surreal", "node"])
+    WrappedNode(node) ->
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("WrappedNode"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias("node", to_module(node))
+      |> module.add_import(["surreal", "node"])
     Update(target:, set:, where:) ->
-      "node.Update(target: \""
-      <> target
-      <> "\", set: ["
-      <> string.join(list.map(set, to_gleam_code), ", ")
-      <> "], where: "
-      <> option.map(where, fn(node) {
-        "option.Some(" <> to_gleam_code(node) <> ")"
-      })
-      |> option.unwrap("option.None")
-      <> ")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Update"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "target",
+        module.literal.string(target),
+      )
+      |> module.function_call.add_with_alias(
+        "set",
+        module.literal.list(list.map(set, to_module)),
+      )
+      |> module.function_call.add_with_alias(
+        "where",
+        option_of(where, to_module),
+      )
+      |> module.add_import(["surreal", "node"])
     Create(target:, set:) ->
-      "node.Create(target: \""
-      <> target
-      <> "\", set: ["
-      <> string.join(list.map(set, to_gleam_code), ", ")
-      <> "])"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Create"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "target",
+        module.literal.string(target),
+      )
+      |> module.function_call.add_with_alias(
+        "set",
+        module.literal.list(list.map(set, to_module)),
+      )
+      |> module.add_import(["surreal", "node"])
     Relate(table:, from:, to:, set:) ->
-      "node.Relate(table: \""
-      <> table
-      <> "\", from: "
-      <> to_gleam_code(from)
-      <> ", to: "
-      <> to_gleam_code(to)
-      <> ", set: ["
-      <> string.join(list.map(set, to_gleam_code), ", ")
-      <> "])"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Relate"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "table",
+        module.literal.string(table),
+      )
+      |> module.function_call.add_with_alias("from", to_module(from))
+      |> module.function_call.add_with_alias("to", to_module(to))
+      |> module.function_call.add_with_alias(
+        "set",
+        module.literal.list(list.map(set, to_module)),
+      )
+      |> module.add_import(["surreal", "node"])
     Lambda(parameters:, body:) ->
-      "node.Lambda(parameters: ["
-      <> string.join(list.map(parameters, fn(p) { "\"" <> p <> "\"" }), ", ")
-      <> "], body: "
-      <> to_gleam_code(body)
-      <> ")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Lambda"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias(
+        "parameters",
+        module.literal.list(list.map(parameters, module.literal.string)),
+      )
+      |> module.function_call.add_with_alias("body", to_module(body))
+      |> module.add_import(["surreal", "node"])
     Delete(target:, where:) ->
-      "node.Delete(target: "
-      <> to_gleam_code(target)
-      <> ", where: "
-      <> option.map(where, fn(node) {
-        "option.Some(" <> to_gleam_code(node) <> ")"
-      })
-      |> option.unwrap("option.None")
-      <> ")"
+      module.binop.access(
+        module.identifier.create("node"),
+        module.identifier.create("Delete"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add_with_alias("target", to_module(target))
+      |> module.function_call.add_with_alias(
+        "where",
+        option_of(where, to_module),
+      )
+      |> module.add_import(["surreal", "node"])
   }
 }
