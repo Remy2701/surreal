@@ -35,20 +35,59 @@ pub fn from_string(str: String) -> Result(SurrealType, String) {
   }
 }
 
-pub fn to_gleam_type_str(kind: SurrealType) -> String {
+pub fn to_gleam_type(kind: SurrealType) -> module.Module {
   case kind {
-    Datetime -> "timestamp.Timestamp"
-    Int -> "Int"
-    Float -> "Float"
-    Identifier(name) -> "identifier.Identifier(" <> name <> ")"
-    Record(name) -> "record.Record(" <> name <> ")"
-    String -> "String"
-    Bool -> "Bool"
-    Option(inner) -> "option.Option(" <> to_gleam_type_str(inner) <> ")"
-    Array(inner) -> "List(" <> to_gleam_type_str(inner) <> ")"
-    Point -> "point.Point"
-    Object -> "json_value.JsonValue"
-    None -> "Nil"
+    Datetime ->
+      module.binop.access(
+        module.identifier.create("timestamp"),
+        module.identifier.create("Timestamp"),
+      )
+      |> module.add_import(["gleam", "time", "timestamp"])
+    Int -> module.types.int()
+    Float -> module.types.float()
+    Identifier(name) ->
+      module.binop.access(
+        module.identifier.create("identifier"),
+        module.identifier.create("Identifier"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.identifier.create(name))
+      |> module.add_import(["surreal", "identifier"])
+    Record(name) ->
+      module.binop.access(
+        module.identifier.create("record"),
+        module.identifier.create("Record"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(module.identifier.create(name))
+      |> module.add_import(["surreal", "record"])
+    String -> module.types.string()
+    Bool -> module.identifier.create("Bool")
+    Option(inner) ->
+      module.binop.access(
+        module.identifier.create("option"),
+        module.identifier.create("Option"),
+      )
+      |> module.function_call.create()
+      |> module.function_call.add(to_gleam_type(inner))
+      |> module.add_import(["gleam", "option"])
+    Array(inner) ->
+      module.identifier.create("List")
+      |> module.function_call.create()
+      |> module.function_call.add(to_gleam_type(inner))
+    Point ->
+      module.binop.access(
+        module.identifier.create("point"),
+        module.identifier.create("point"),
+      )
+      |> module.add_import(["surreal", "point"])
+    Object ->
+      module.binop.access(
+        module.identifier.create("json_value"),
+        module.identifier.create("JsonValue"),
+      )
+      |> module.add_import(["json_value"])
+    None -> module.identifier.create("Nil")
   }
 }
 
