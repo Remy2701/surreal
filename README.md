@@ -9,7 +9,7 @@ Surreal is a library for interacting with [SurrealDB](https://surrealdb.com/). T
 
 ```toml
 [dependencies]
-surreal = { git = "https://github.com/Remy2701/surreal.git", ref = "v0.1.11" }
+surreal = { git = "https://github.com/Remy2701/surreal.git", ref = "v0.1.12" }
 ```
 ```gleam
 import surreal
