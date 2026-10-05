@@ -33,3 +33,13 @@ pub fn decoder(
     identifier.decoder() |> decode.map(Id),
   ])
 }
+
+pub fn typed_decoder(
+  decoder: decode.Decoder(a),
+  id: fn(a) -> identifier.Identifier(a),
+  types: List(String),
+) -> decode.Decoder(Record(a)) {
+  decode.one_of(decoder |> decode.map(fn(data) { Record(id(data), data) }), [
+    identifier.typed_decoder(types) |> decode.map(Id),
+  ])
+}
