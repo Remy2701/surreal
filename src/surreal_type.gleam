@@ -78,7 +78,7 @@ pub fn to_gleam_type(kind: SurrealType) -> module.Module {
     Point ->
       module.binop.access(
         module.identifier.create("point"),
-        module.identifier.create("point"),
+        module.identifier.create("Point"),
       )
       |> module.add_import(["surreal", "point"])
     Object ->
