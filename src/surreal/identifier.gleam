@@ -143,7 +143,7 @@ pub fn generate(type_: Option(String)) -> Identifier(a) {
   let str =
     int.range(0, identifier_max_length, "", fn(acc, _) {
       let number = int.random(36)
-      let character = case number > 26 {
+      let character = case number >= 26 {
         False -> {
           codepoint_a
           |> string.utf_codepoint_to_int()
@@ -157,7 +157,7 @@ pub fn generate(type_: Option(String)) -> Identifier(a) {
           codepoint_0
           |> string.utf_codepoint_to_int()
           |> int.add(number)
-          |> int.min(26)
+          |> int.subtract(26)
           |> string.utf_codepoint()
           |> result.unwrap(codepoint_0)
           |> list.wrap()
