@@ -1,7 +1,7 @@
 import gleam/dynamic/decode
 import gleam/json
 import surreal/identifier
-import surreal_ql
+import surreal/surreal_ql
 
 pub type Record(a) {
   Record(id: identifier.Identifier(a), data: a)

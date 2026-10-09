@@ -9,7 +9,7 @@ import gleam/result
 import gleam/string
 import surreal.{type Connection, type SurrealError, type SurrealResponse}
 import surreal/identifier.{type Identifier}
-import surreal_ql
+import surreal/surreal_ql
 
 /// Applies the necessary headers to the HTTP request based on the SurrealDB connection.
 /// This includes setting the "Keep-Alive", "Surreal-DB", "Surreal-NS", "Authorization", and "Accept" headers.

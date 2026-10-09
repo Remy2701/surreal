@@ -3,8 +3,8 @@ import gleam/list
 import gleam/option.{type Option}
 import gleam/string
 import module
-import surreal_ql
-import surreal_type
+import surreal/surreal_ql
+import surreal/surreal_type
 
 pub type OrderDirection {
   Ascending

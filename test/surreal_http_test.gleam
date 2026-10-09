@@ -7,12 +7,12 @@ import gleam/option
 import gleam/pair
 import gleam/string
 import gleeunit/should
-import http/surreal_http
 import surreal
+import surreal/http/surreal_http
 import surreal/identifier
 import surreal/response
+import surreal/surreal_ql
 import surreal/surreal_sim
-import surreal_ql
 import surreal_test
 
 // TODO: Move surreal_http and surreal_wss to surreal/

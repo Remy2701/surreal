@@ -11,7 +11,7 @@ import gleam/option
 import gleam/result
 import gleam/string
 import surreal
-import surreal_ql
+import surreal/surreal_ql
 
 pub type SurrealWssConnection {
   SurrealWssConnection(
