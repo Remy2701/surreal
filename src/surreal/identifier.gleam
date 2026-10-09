@@ -2,15 +2,19 @@ import gleam/bool
 import gleam/dynamic/decode
 import gleam/int
 import gleam/list
-import gleam/option
+import gleam/option.{type Option, None, Some}
 import gleam/order
 import gleam/result
 import gleam/string
 import str
 
-//-----------------------------------------------------------------------------------------------//
+const identifier_max_length = 20
+
+const type_max_length = 20
+
+// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– //
 //                                          Identifier                                           //
-//-----------------------------------------------------------------------------------------------//
+// ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––– //
 
 /// A typed identifier that can be used to uniquely identify a record in a SurrealDB database. The 
 /// type parameter `a` is used to associate the identifier with a specific table or record type.
@@ -18,21 +22,34 @@ import str
 /// A typed identifier has the following string representation `type:id` but the type is optional
 /// and can also be represented as just `id`.
 pub type Identifier(a) {
-  Identifier(type_: option.Option(String), id: String)
+  Identifier(type_: Option(String), id: String)
 }
 
+/// Verify that the given string is a valid identifier. An identifier must be alphanumeric and
+/// cannot exceed 20 characters in length. If the string is valid, it is returned as an `Ok` 
+/// result, otherwise an `Error` result is returned.
+/// 
+/// Note: This is not standard SurrealDB behavior, but a custom validation to ensure that 
+/// identifiers are valid and conform to the expected format. This is done to avoid query
+/// injection and other security issues that may arise from using invalid identifiers in queries.
 fn verify_identifier(str: String) -> Result(String, Nil) {
   use <- bool.guard(!str.is_alphanumeric(str), Error(Nil))
-  use <- bool.guard(string.length(str) > 20, Error(Nil))
+  use <- bool.guard(string.length(str) > identifier_max_length, Error(Nil))
   Ok(str)
 }
 
+/// Verify that the type of the identifier is valid. A type must be alphanumeric and cannot exceed 
+/// 20 characters.
+/// 
+/// Note: This is not standard SurrealDB behavior, but a custom validation to ensure that 
+/// identifiers are valid and conform to the expected format. This is done to avoid query
+/// injection and other security issues that may arise from using invalid identifiers in queries.
 fn verify_type(str: String) -> Result(String, Nil) {
   use <- bool.guard(
     !str.is_alphanumeric(string.replace(str, "_", "")),
     Error(Nil),
   )
-  use <- bool.guard(string.length(str) >= 20, Error(Nil))
+  use <- bool.guard(string.length(str) >= type_max_length, Error(Nil))
   Ok(str)
 }
 
@@ -43,11 +60,11 @@ pub fn from_string(str: String) -> Result(Identifier(a), Nil) {
     Ok(#(type_, id)) -> {
       use type_ <- result.try(verify_type(type_))
       use id <- result.try(verify_identifier(id))
-      Ok(Identifier(option.Some(type_), id))
+      Ok(Identifier(Some(type_), id))
     }
     _ -> {
       use str <- result.try(verify_identifier(str))
-      Ok(Identifier(option.None, str))
+      Ok(Identifier(None, str))
     }
   }
 }
@@ -56,22 +73,22 @@ pub fn from_string(str: String) -> Result(Identifier(a), Nil) {
 /// represented as `type:id`, otherwise it will be represented as just `id`.
 pub fn to_string(self: Identifier(a)) -> String {
   case self.type_ {
-    option.Some(type_) -> type_ <> ":" <> self.id
-    option.None -> self.id
+    Some(type_) -> type_ <> ":" <> self.id
+    None -> self.id
   }
 }
 
 /// Replace the type of the identifier with a new type. This is useful for converting between different
 /// types of identifiers that may represent the same underlying record in the database.
 pub fn typed(self: Identifier(a), type_: String) -> Identifier(b) {
-  Identifier(option.Some(type_), self.id)
+  Identifier(Some(type_), self.id)
 }
 
 /// Remove the type from the identifier, returning an untyped identifier. This is useful for
 /// converting a typed identifier to an untyped identifier that can be used in contexts where the
 /// type is not needed or relevant.
 pub fn untyped(self: Identifier(a)) -> Identifier(b) {
-  Identifier(option.None, self.id)
+  Identifier(None, self.id)
 }
 
 /// The decoder for the Identifier type. This decoder will parse a string representation of an identifier
@@ -81,7 +98,7 @@ pub fn decoder() -> decode.Decoder(Identifier(a)) {
   case from_string(str) {
     Ok(id) -> decode.success(id)
     Error(_) ->
-      decode.failure(Identifier(option.None, "INVALID"), "Invalid identifier")
+      decode.failure(Identifier(None, "INVALID"), "Invalid identifier")
   }
 }
 
@@ -104,37 +121,50 @@ pub fn typed_decoder(
       })
     False ->
       decode.failure(
-        Identifier(option.None, "INVALID"),
+        Identifier(None, "INVALID"),
         "Identifier[" <> string.join(allowed_types, " | ") <> "]",
       )
   }
 }
 
+/// Compare two identifiers by their string representation. This is useful for sorting or ordering
+/// identifiers in a consistent manner. The comparison is case-sensitive and will return an `Order`
+/// value indicating whether the first identifier is less than, equal to, or greater than the second
+/// identifier.
 pub fn compare(a: Identifier(a), b: Identifier(b)) -> order.Order {
   string.compare(to_string(a), to_string(b))
 }
 
-pub fn generate(type_: option.Option(String)) -> Identifier(a) {
+/// Generate a new identifier with a random alphanumeric string of 20 characters. The type is 
+/// optional and can be used to associate the identifier with a specific table or record type.
+pub fn generate(type_: Option(String)) -> Identifier(a) {
   let assert [codepoint_a, codepoint_0] = string.to_utf_codepoints("a0")
 
   let str =
-    int.range(0, 20, "", fn(acc, _) {
-      let i = int.random(36)
-      acc
-      <> case int.compare(i, 26) {
-        order.Lt -> {
-          let assert Ok(codepoint) =
-            string.utf_codepoint(string.utf_codepoint_to_int(codepoint_a) + i)
-          string.from_utf_codepoints([codepoint])
+    int.range(0, identifier_max_length, "", fn(acc, _) {
+      let number = int.random(36)
+      let character = case number > 26 {
+        False -> {
+          codepoint_a
+          |> string.utf_codepoint_to_int()
+          |> int.add(number)
+          |> string.utf_codepoint()
+          |> result.unwrap(codepoint_a)
+          |> list.wrap()
+          |> string.from_utf_codepoints()
         }
-        _ -> {
-          let assert Ok(codepoint) =
-            string.utf_codepoint(
-              string.utf_codepoint_to_int(codepoint_0) + i - 26,
-            )
-          string.from_utf_codepoints([codepoint])
+        True -> {
+          codepoint_0
+          |> string.utf_codepoint_to_int()
+          |> int.add(number)
+          |> int.min(26)
+          |> string.utf_codepoint()
+          |> result.unwrap(codepoint_0)
+          |> list.wrap()
+          |> string.from_utf_codepoints()
         }
       }
+      acc <> character
     })
 
   Identifier(type_, str)
