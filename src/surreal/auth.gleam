@@ -10,6 +10,7 @@ import gleam/order
 import gleam/result
 import gleam/time/timestamp
 
+/// The payload structure for JWT authentication, containing standard claims and custom fields.
 pub type Payload {
   Payload(
     issued_at: timestamp.Timestamp,
@@ -24,10 +25,14 @@ pub type Payload {
   )
 }
 
+/// A decoder for a timestamp represented as an integer in seconds since the Unix epoch. It 
+/// converts the integer to a `timestamp.Timestamp` type.
 fn int_time_decoder() -> decode.Decoder(timestamp.Timestamp) {
   decode.map(decode.int, timestamp.from_unix_seconds)
 }
 
+/// Verifies a JWT string using the provided key. It checks the signature, extracts claims, and 
+/// validates the token's timing constraints.
 pub fn verify_jwt(jwt: String, key: key.Key) -> Result(Payload, Nil) {
   use <- bool.guard(!gjwt.verify(jwt, key), Error(Nil))
 
@@ -36,39 +41,39 @@ pub fn verify_jwt(jwt: String, key: key.Key) -> Result(Payload, Nil) {
 
   use issued_at <- result.try(
     payload.get_claim(payload, "iat", int_time_decoder())
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
   use not_valid_before <- result.try(
     payload.get_claim(payload, "nbf", int_time_decoder())
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
   use expire_at <- result.try(
     payload.get_claim(payload, "exp", int_time_decoder())
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
   use issuer <- result.try(
     payload.get_claim(payload, "iss", decode.string)
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
   use jwt_id <- result.try(
     payload.get_claim(payload, "jti", decode.string)
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
   use namespace <- result.try(
     payload.get_claim(payload, "NS", decode.string)
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
   use database <- result.try(
     payload.get_claim(payload, "DB", decode.string)
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
   use access <- result.try(
     payload.get_claim(payload, "AC", decode.string)
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
   use id <- result.try(
     payload.get_claim(payload, "ID", decode.string)
-    |> result.map_error(fn(_) { Nil }),
+    |> result.replace_error(Nil),
   )
 
   use <- bool.guard(
@@ -94,6 +99,8 @@ pub fn verify_jwt(jwt: String, key: key.Key) -> Result(Payload, Nil) {
   ))
 }
 
+/// Generates a JWT token with the given payload and signs it using the provided key. It 
+/// constructs the JWT header and payload, then signs the token to produce a JWT string.
 pub fn generate_jwt(payload: Payload, key: key.Key) -> String {
   let gjwt_payload =
     payload.new()
