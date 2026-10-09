@@ -4,6 +4,7 @@ import gleam/int
 import gleam/json
 import gleam/list
 import gleam/option
+import gleam/pair
 import gleam/string
 import json_value
 
@@ -93,13 +94,9 @@ pub fn to_json(value: SurrealQL) -> json.Json {
     Datetime(dt) -> json.string(dt)
     Null -> json.string("NONE")
     Object(fields) -> {
-      let field_pairs =
-        fields
-        |> list.map(fn(entry) {
-          let #(key, value) = entry
-          #(key, to_json(value))
-        })
-      json.object(field_pairs)
+      fields
+      |> list.map(pair.map_second(_, to_json))
+      |> json.object()
     }
     Raw(s) -> json.string(s)
     Array(items) -> json.array(items, to_json)
