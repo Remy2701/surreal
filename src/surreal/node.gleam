@@ -2,7 +2,7 @@ import gleam/float
 import gleam/list
 import gleam/option.{type Option}
 import gleam/string
-import module
+import omcg/module
 import surreal/surreal_ql
 import surreal/surreal_type
 

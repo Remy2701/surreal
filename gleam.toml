@@ -16,8 +16,8 @@ gjwt = ">= 2.0.1 and < 3.0.0"
 sceall = ">= 1.1.0 and < 2.0.0"
 exception = ">= 2.1.0 and < 3.0.0"
 str = ">= 2.1.1 and < 3.0.0"
-module = { git = "https://github.com/Remy2701/module.git", ref = "v0.1.4" }
 gleam_time = ">= 1.11.0 and < 2.0.0"
+omcg = ">= 0.2.0 and < 1.0.0"
 
 [dev_dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

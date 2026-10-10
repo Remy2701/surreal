@@ -1,7 +1,7 @@
 import gleam/option
 import gleam/result
-import module
-import module/id_case
+import omcg/id_case
+import omcg/module
 
 pub type SurrealType {
   String

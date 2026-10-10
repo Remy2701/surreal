@@ -15,8 +15,6 @@ import surreal/surreal_ql
 import surreal/surreal_sim
 import surreal_test
 
-// TODO: Move surreal_http and surreal_wss to surreal/
-
 //-----------------------------------------------------------------------------------------------//
 //                                          GET /status                                          //
 //-----------------------------------------------------------------------------------------------//
