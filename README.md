@@ -9,10 +9,10 @@ Surreal is a library for interacting with [SurrealDB](https://surrealdb.com/). T
 
 ```toml
 [dependencies]
-surreal = { git = "https://github.com/Remy2701/surreal.git", ref = "v0.2.1" }
+suweal = ">= 0.3.0 and < 1.0.0"
 ```
 ```gleam
-import surreal
+import suweal
 
 pub fn main() -> Nil {}
 ```

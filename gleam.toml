@@ -1,6 +1,10 @@
 name = "suweal"
-version = "0.2.1"
+version = "0.3.0"
 target = "erlang"
+
+description = "A SDK for SurrealDB."
+licences = ["Apache-2.0"]
+repository = { type = "github", user = "Remy2701", repo = "suweal" }
 
 [dependencies]
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
