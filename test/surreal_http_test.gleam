@@ -7,13 +7,13 @@ import gleam/option
 import gleam/pair
 import gleam/string
 import gleeunit/should
-import surreal
-import surreal/http/surreal_http
-import surreal/identifier
-import surreal/response
-import surreal/surreal_ql
-import surreal/surreal_sim
-import surreal_test
+import suweal
+import suweal/http/surreal_http
+import suweal/identifier
+import suweal/response
+import suweal/surreal_ql
+import suweal/surreal_sim
+import suweal_test
 
 //-----------------------------------------------------------------------------------------------//
 //                                          GET /status                                          //
@@ -21,7 +21,7 @@ import surreal_test
 
 pub fn status_request_test() {
   let connection =
-    surreal.connection(
+    suweal.connection(
       endpoint: "http://localhost:8000",
       namespace: "namespace",
       database: "database",
@@ -53,7 +53,7 @@ pub fn status_request_test() {
 }
 
 pub fn status_test() {
-  use <- bool.guard(!surreal_test.run_http_test, Nil)
+  use <- bool.guard(!suweal_test.run_http_test, Nil)
   use connection <- surreal_sim.with_surreal_db()
 
   connection
@@ -68,7 +68,7 @@ pub fn status_test() {
 //-----------------------------------------------------------------------------------------------//
 
 pub fn health_test() {
-  use <- bool.guard(!surreal_test.run_http_test, Nil)
+  use <- bool.guard(!suweal_test.run_http_test, Nil)
   use connection <- surreal_sim.with_surreal_db()
 
   connection
@@ -83,7 +83,7 @@ pub fn health_test() {
 //-----------------------------------------------------------------------------------------------//
 
 pub fn ready_test() {
-  use <- bool.guard(!surreal_test.run_http_test, Nil)
+  use <- bool.guard(!suweal_test.run_http_test, Nil)
   use <- bool.guard(True, Nil)
   // Disable since requires > v3.2.0
   use connection <- surreal_sim.with_surreal_db()
@@ -100,7 +100,7 @@ pub fn ready_test() {
 //-----------------------------------------------------------------------------------------------//
 
 pub fn version_test() {
-  use <- bool.guard(!surreal_test.run_http_test, Nil)
+  use <- bool.guard(!suweal_test.run_http_test, Nil)
   use connection <- surreal_sim.with_surreal_db()
 
   connection
@@ -134,7 +134,7 @@ pub fn version_test() {
 //-----------------------------------------------------------------------------------------------//
 
 pub fn post_record_test() {
-  use <- bool.guard(!surreal_test.run_http_test, Nil)
+  use <- bool.guard(!suweal_test.run_http_test, Nil)
   use connection <- surreal_sim.with_surreal_db()
 
   // Create the table and field if they don't exist
@@ -163,7 +163,7 @@ pub fn post_record_test() {
   |> should.be_ok()
   |> list.flat_map(fn(data) {
     data
-    |> surreal.should_be_success()
+    |> suweal.should_be_success()
     |> should.be_some()
   })
   |> should.equal([#("user:lucy", "Lucy")])
@@ -184,7 +184,7 @@ pub fn post_record_test() {
   |> should.be_ok()
   |> list.map(fn(data) {
     data
-    |> surreal.should_be_error()
+    |> suweal.should_be_error()
   })
 
   Nil
@@ -195,7 +195,7 @@ pub fn post_record_test() {
 //-----------------------------------------------------------------------------------------------//
 
 pub fn run_sql_test() {
-  use <- bool.guard(!surreal_test.run_http_test, Nil)
+  use <- bool.guard(!suweal_test.run_http_test, Nil)
   use connection <- surreal_sim.with_surreal_db()
 
   // Create the table and field if they don't exist
@@ -222,7 +222,7 @@ pub fn run_sql_test() {
     |> should.be_ok()
   let assert [res] = res
     as "Expected a single response from the INFO FOR TABLE command"
-  let assert surreal.SurrealResponse(result:, ..) = res
+  let assert suweal.SurrealResponse(result:, ..) = res
     as "Expected a successful response from the INFO FOR TABLE command"
   let assert option.Some(info) = result
     as "Expected a result from the INFO FOR TABLE command"

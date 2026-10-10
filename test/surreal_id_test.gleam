@@ -1,7 +1,7 @@
 import gleam/list
 import gleam/option
 import gleam/string
-import surreal/identifier
+import suweal/identifier
 
 pub fn surreal_rand_id_test() {
   let id = identifier.generate(option.None)

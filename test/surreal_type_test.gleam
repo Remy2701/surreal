@@ -1,5 +1,5 @@
 import gleeunit/should
-import surreal/surreal_type
+import suweal/surreal_type
 
 //-----------------------------------------------------------------------------------------------//
 //                                          From String                                          //

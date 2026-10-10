@@ -1,6 +1,6 @@
 import gleam/dynamic/decode
 import gleam/json
-import surreal/surreal_ql
+import suweal/surreal_ql
 
 pub type Point {
   Point(latitude: Float, longitude: Float)

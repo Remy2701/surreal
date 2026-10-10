@@ -1,8 +1,8 @@
 import gleam/dynamic/decode
 import gleam/json
-import surreal/identifier
-import surreal/node
-import surreal/surreal_ql
+import suweal/identifier
+import suweal/node
+import suweal/surreal_ql
 
 /// The table specifications for a given database table. This is a blueprint 
 /// to work with both gleam's decoder and custom decoder (e.g. backstage)

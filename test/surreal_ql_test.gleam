@@ -2,7 +2,7 @@ import gleam/dict
 import gleam/json
 import gleeunit/should
 import json_value
-import surreal/surreal_ql
+import suweal/surreal_ql
 
 //-----------------------------------------------------------------------------------------------//
 //                                            To JSON                                            //

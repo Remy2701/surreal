@@ -7,9 +7,9 @@ import gleam/list
 import gleam/option
 import gleam/result
 import gleam/string
-import surreal.{type Connection, type SurrealError, type SurrealResponse}
-import surreal/identifier.{type Identifier}
-import surreal/surreal_ql
+import suweal.{type Connection, type SurrealError, type SurrealResponse}
+import suweal/identifier.{type Identifier}
+import suweal/surreal_ql
 
 /// Applies the necessary headers to the HTTP request based on the SurrealDB connection.
 /// This includes setting the "Keep-Alive", "Surreal-DB", "Surreal-NS", "Authorization", and "Accept" headers.
@@ -125,7 +125,7 @@ pub fn version_request(
 ) -> Result(Request(String), SurrealError) {
   use req <- result.try(
     endpoint(connection, "/version")
-    |> result.replace_error(surreal.InvalidUrl),
+    |> result.replace_error(suweal.InvalidUrl),
   )
 
   req
@@ -139,12 +139,12 @@ pub fn version_request(
 pub fn version(connection: Connection) -> Result(String, SurrealError) {
   use req <- result.try(version_request(connection))
 
-  use resp <- result.try(httpc.send(req) |> result.map_error(surreal.HttpError))
+  use resp <- result.try(httpc.send(req) |> result.map_error(suweal.HttpError))
 
   case resp.status {
     200 -> Ok(resp.body)
     _ ->
-      Error(surreal.ErrorResponse(
+      Error(suweal.ErrorResponse(
         code: resp.status,
         details: "",
         description: "",
@@ -206,7 +206,7 @@ pub fn signin_request(
 ) -> Result(Request(String), SurrealError) {
   use req <- result.try(
     endpoint(connection, "/signin")
-    |> result.replace_error(surreal.InvalidUrl),
+    |> result.replace_error(suweal.InvalidUrl),
   )
 
   req
@@ -228,16 +228,16 @@ pub fn signin(
   email: String,
   password: String,
   content: List(#(String, surreal_ql.SurrealQL)),
-) -> Result(String, surreal.SurrealError) {
+) -> Result(String, suweal.SurrealError) {
   use req <- result.try(
     authentication_body(connection, table, email, password, content)
     |> signin_request(connection, _),
   )
 
-  use resp <- result.try(httpc.send(req) |> result.map_error(surreal.HttpError))
+  use resp <- result.try(httpc.send(req) |> result.map_error(suweal.HttpError))
 
-  json.parse(resp.body, surreal.auth_result_decoder())
-  |> result.map_error(surreal.FailedToDecode)
+  json.parse(resp.body, suweal.auth_result_decoder())
+  |> result.map_error(suweal.FailedToDecode)
   |> result.flatten()
 }
 
@@ -253,7 +253,7 @@ pub fn signup_request(
 ) -> Result(Request(String), SurrealError) {
   use req <- result.try(
     endpoint(connection, "/signup")
-    |> result.replace_error(surreal.InvalidUrl),
+    |> result.replace_error(suweal.InvalidUrl),
   )
 
   req
@@ -275,16 +275,16 @@ pub fn signup(
   email: String,
   password: String,
   content: List(#(String, surreal_ql.SurrealQL)),
-) -> Result(String, surreal.SurrealError) {
+) -> Result(String, suweal.SurrealError) {
   use req <- result.try(
     authentication_body(connection, table, email, password, content)
     |> signup_request(connection, _),
   )
 
-  use resp <- result.try(httpc.send(req) |> result.map_error(surreal.HttpError))
+  use resp <- result.try(httpc.send(req) |> result.map_error(suweal.HttpError))
 
-  json.parse(resp.body, surreal.auth_result_decoder())
-  |> result.map_error(surreal.FailedToDecode)
+  json.parse(resp.body, suweal.auth_result_decoder())
+  |> result.map_error(suweal.FailedToDecode)
   |> result.flatten()
 }
 
@@ -304,10 +304,10 @@ pub fn get_records(
   connection: Connection,
   table: String,
   decoder: decode.Decoder(a),
-) -> Result(List(SurrealResponse(List(a))), surreal.SurrealError) {
+) -> Result(List(SurrealResponse(List(a))), suweal.SurrealError) {
   use req <- result.try(
     request.to(connection.endpoint <> "/key/" <> table)
-    |> result.replace_error(surreal.InvalidUrl),
+    |> result.replace_error(suweal.InvalidUrl),
   )
   use resp <- result.try(
     httpc.send(
@@ -315,12 +315,12 @@ pub fn get_records(
       |> request.set_method(http.Get)
       |> apply_headers(connection),
     )
-    |> result.map_error(surreal.HttpError),
+    |> result.map_error(suweal.HttpError),
   )
 
   resp.body
-  |> json.parse(surreal.result_decoder(decode.list(decoder)))
-  |> result.map_error(surreal.FailedToDecode)
+  |> json.parse(suweal.result_decoder(decode.list(decoder)))
+  |> result.map_error(suweal.FailedToDecode)
   |> result.flatten()
 }
 
@@ -341,10 +341,10 @@ pub fn post_table(
   table: String,
   content: surreal_ql.SurrealQL,
   decoder: decode.Decoder(a),
-) -> Result(List(SurrealResponse(List(a))), surreal.SurrealError) {
+) -> Result(List(SurrealResponse(List(a))), suweal.SurrealError) {
   use req <- result.try(
     request.to(connection.endpoint <> "/key/" <> table)
-    |> result.replace_error(surreal.InvalidUrl),
+    |> result.replace_error(suweal.InvalidUrl),
   )
   use resp <- result.try(
     httpc.send(
@@ -353,12 +353,12 @@ pub fn post_table(
       |> request.set_body(surreal_ql.to_json(content) |> json.to_string())
       |> apply_headers(connection),
     )
-    |> result.map_error(surreal.HttpError),
+    |> result.map_error(suweal.HttpError),
   )
 
   resp.body
-  |> json.parse(surreal.result_decoder(decode.list(decoder)))
-  |> result.map_error(surreal.FailedToDecode)
+  |> json.parse(suweal.result_decoder(decode.list(decoder)))
+  |> result.map_error(suweal.FailedToDecode)
   |> result.flatten()
 }
 
@@ -387,7 +387,7 @@ pub fn get_record_raw(
     request.to(
       connection.endpoint <> "/key/" <> table <> "/" <> identifier.to_string(id),
     )
-    |> result.replace_error(surreal.InvalidUrl),
+    |> result.replace_error(suweal.InvalidUrl),
   )
   use resp <- result.try(
     httpc.send(
@@ -395,12 +395,12 @@ pub fn get_record_raw(
       |> request.set_method(http.Get)
       |> apply_headers(connection),
     )
-    |> result.map_error(surreal.HttpError),
+    |> result.map_error(suweal.HttpError),
   )
 
   resp.body
-  |> json.parse(surreal.result_decoder(decode.list(decoder)))
-  |> result.map_error(surreal.FailedToDecode)
+  |> json.parse(suweal.result_decoder(decode.list(decoder)))
+  |> result.map_error(suweal.FailedToDecode)
   |> result.flatten()
 }
 
@@ -419,28 +419,23 @@ pub fn get_record(
   table: String,
   id: identifier.Identifier(a),
   decoder: decode.Decoder(a),
-) -> Result(a, surreal.SurrealError) {
+) -> Result(a, suweal.SurrealError) {
   use result <- result.try(get_record_raw(connection, table, id, decoder))
   case result {
-    [] -> Error(surreal.NoResponse)
+    [] -> Error(suweal.NoResponse)
     [first, ..] ->
       case first {
-        surreal.SurrealResponse(result:, ..) ->
+        suweal.SurrealResponse(result:, ..) ->
           result
-          |> option.to_result(surreal.NoResponse)
+          |> option.to_result(suweal.NoResponse)
           |> result.try(fn(result) {
             case result {
-              [] -> Error(surreal.NoResponse)
+              [] -> Error(suweal.NoResponse)
               [first, ..] -> Ok(first)
             }
           })
-        surreal.SurrealErrorResponse(kind:, details:, result:, ..) ->
-          Error(surreal.ErrorResponse(
-            200,
-            string.inspect(details),
-            kind,
-            result,
-          ))
+        suweal.SurrealErrorResponse(kind:, details:, result:, ..) ->
+          Error(suweal.ErrorResponse(200, string.inspect(details), kind, result))
       }
   }
 }
@@ -463,12 +458,12 @@ pub fn post_record(
   id: identifier.Identifier(a),
   content: surreal_ql.SurrealQL,
   decoder: decode.Decoder(a),
-) -> Result(List(SurrealResponse(List(a))), surreal.SurrealError) {
+) -> Result(List(SurrealResponse(List(a))), suweal.SurrealError) {
   use req <- result.try(
     request.to(
       connection.endpoint <> "/key/" <> table <> "/" <> identifier.to_string(id),
     )
-    |> result.replace_error(surreal.InvalidUrl),
+    |> result.replace_error(suweal.InvalidUrl),
   )
 
   use resp <- result.try(
@@ -478,12 +473,12 @@ pub fn post_record(
       |> apply_headers(connection)
       |> request.set_body(surreal_ql.to_string(content)),
     )
-    |> result.map_error(surreal.HttpError),
+    |> result.map_error(suweal.HttpError),
   )
 
   resp.body
-  |> json.parse(surreal.result_decoder(decode.list(decoder)))
-  |> result.map_error(surreal.FailedToDecode)
+  |> json.parse(suweal.result_decoder(decode.list(decoder)))
+  |> result.map_error(suweal.FailedToDecode)
   |> result.flatten()
 }
 
@@ -499,10 +494,10 @@ pub fn run_sql(
   query: String,
   parameters: List(#(String, surreal_ql.SurrealQL)),
   decoder: decode.Decoder(a),
-) -> Result(List(SurrealResponse(a)), surreal.SurrealError) {
+) -> Result(List(SurrealResponse(a)), suweal.SurrealError) {
   use req <- result.try(
     request.to(connection.endpoint <> "/sql")
-    |> result.replace_error(surreal.InvalidUrl),
+    |> result.replace_error(suweal.InvalidUrl),
   )
 
   use resp <- result.try(
@@ -516,11 +511,11 @@ pub fn run_sql(
       )
       |> request.set_body(query),
     )
-    |> result.map_error(surreal.HttpError),
+    |> result.map_error(suweal.HttpError),
   )
 
   resp.body
-  |> json.parse(surreal.result_decoder(decoder))
-  |> result.map_error(surreal.FailedToDecode)
+  |> json.parse(suweal.result_decoder(decoder))
+  |> result.map_error(suweal.FailedToDecode)
   |> result.flatten()
 }

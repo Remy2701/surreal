@@ -7,7 +7,7 @@ import gleam/int
 import gleam/result
 import gleam/string
 import sceall
-import surreal
+import suweal
 
 //-----------------------------------------------------------------------------------------------//
 //                                      Internal Functions                                       //
@@ -104,15 +104,15 @@ fn terminate(program: sceall.ProgramHandle) -> Nil {
   }
 }
 
-pub fn connection() -> surreal.Connection {
-  surreal.connection("http://localhost:8000", "main", "main", "root", "root")
+pub fn connection() -> suweal.Connection {
+  suweal.connection("http://localhost:8000", "main", "main", "root", "root")
 }
 
 /// Run a function with a surrealDB instance running in memory. The properties of the database are
 /// passed through the connection parameter.
 /// 
 /// This should only be used for testing purposes and may potentially be unsafe.
-pub fn with_surreal_db(next: fn(surreal.Connection) -> a) -> a {
+pub fn with_surreal_db(next: fn(suweal.Connection) -> a) -> a {
   let handle = start()
   use <- exception.defer(fn() { terminate(handle) })
 

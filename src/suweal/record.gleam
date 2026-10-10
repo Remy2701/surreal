@@ -1,7 +1,7 @@
 import gleam/dynamic/decode
 import gleam/json
-import surreal/identifier
-import surreal/surreal_ql
+import suweal/identifier
+import suweal/surreal_ql
 
 /// A record in SurrealDB can either be a full record with data, or just an identifier.
 /// The `id` field in the Record variant is used to allow `record.id` without matching

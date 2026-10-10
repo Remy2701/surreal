@@ -10,13 +10,13 @@ import gleam/list
 import gleam/option
 import gleam/result
 import gleam/string
-import surreal
-import surreal/surreal_ql
+import suweal
+import suweal/surreal_ql
 
 pub type SurrealWssConnection {
   SurrealWssConnection(
     subject: process.Subject(collie.WebsocketMessage(SurrealWssMessage)),
-    connection: surreal.Connection,
+    connection: suweal.Connection,
   )
 }
 
@@ -26,7 +26,7 @@ pub fn with_namespace(
 ) -> SurrealWssConnection {
   SurrealWssConnection(
     ..connection,
-    connection: surreal.with_namespace(connection.connection, namespace),
+    connection: suweal.with_namespace(connection.connection, namespace),
   )
 }
 
@@ -36,7 +36,7 @@ pub fn with_database(
 ) -> SurrealWssConnection {
   SurrealWssConnection(
     ..connection,
-    connection: surreal.with_database(connection.connection, database),
+    connection: suweal.with_database(connection.connection, database),
   )
 }
 
@@ -69,7 +69,7 @@ pub type SurrealWssMessage {
 
 type SurrealWssState {
   SurrealWssState(
-    connection: surreal.Connection,
+    connection: suweal.Connection,
     receivers: dict.Dict(
       Int,
       process.Subject(SurrealWssResponse(dynamic.Dynamic)),
@@ -82,7 +82,7 @@ type SurrealWssState {
 pub type SurrealWssResponse(a) {
   AuthResponse(id: Int, result: String)
   ErrorResponse(id: Int, error: SurrealWssResponseError)
-  QueryResponse(id: Int, result: List(surreal.SurrealResponse(a)))
+  QueryResponse(id: Int, result: List(suweal.SurrealResponse(a)))
   UseResponse(id: Int)
 }
 
@@ -115,7 +115,7 @@ fn surreal_wss_response_decoder(
     "result",
     option.None,
     decode.one_of(
-      decode.list(surreal.surreal_response_decoder(decoder))
+      decode.list(suweal.surreal_response_decoder(decoder))
         |> decode.map(QueryResponse(id, _))
         |> decode.map(option.Some),
       [
@@ -181,7 +181,7 @@ pub fn send_signin(
 
 pub type SurrealWssConnectionBuilder {
   SurrealWssConnectionBuilder(
-    connection: surreal.Connection,
+    connection: suweal.Connection,
     name: option.Option(
       process.Name(collie.WebsocketMessage(SurrealWssMessage)),
     ),
@@ -189,7 +189,7 @@ pub type SurrealWssConnectionBuilder {
   )
 }
 
-pub fn new(connection: surreal.Connection) {
+pub fn new(connection: suweal.Connection) {
   SurrealWssConnectionBuilder(connection, option.None, fn(_) { Nil })
 }
 
@@ -243,7 +243,7 @@ pub fn start(
     |> result.map_error(fn(_) { FailedToConnect }),
   )
 
-  let credentials = surreal.decode_credentials(builder.connection)
+  let credentials = suweal.decode_credentials(builder.connection)
   case credentials {
     Ok(#(username, password)) -> {
       let subject = process.new_subject()
@@ -291,8 +291,8 @@ fn handle_message(
               connection: case state.pending_use {
                 option.Some(#(namespace, database)) ->
                   state.connection
-                  |> surreal.with_namespace(namespace)
-                  |> surreal.with_database(database)
+                  |> suweal.with_namespace(namespace)
+                  |> suweal.with_database(database)
                 _ -> state.connection
               },
               pending_use: option.None,
