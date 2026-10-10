@@ -52,7 +52,7 @@ pub fn to_gleam_type(kind: SurrealType) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.identifier.create(name))
-      |> module.add_import(["surreal", "identifier"])
+      |> module.add_import(["suweal", "identifier"])
     Record(name) ->
       module.binop.access(
         module.identifier.create("record"),
@@ -60,7 +60,7 @@ pub fn to_gleam_type(kind: SurrealType) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.identifier.create(name))
-      |> module.add_import(["surreal", "record"])
+      |> module.add_import(["suweal", "record"])
     String -> module.types.string()
     Bool -> module.identifier.create("Bool")
     Option(inner) ->
@@ -80,7 +80,7 @@ pub fn to_gleam_type(kind: SurrealType) -> module.Module {
         module.identifier.create("point"),
         module.identifier.create("Point"),
       )
-      |> module.add_import(["surreal", "point"])
+      |> module.add_import(["suweal", "point"])
     Object ->
       module.binop.access(
         module.identifier.create("json_value"),
@@ -127,14 +127,14 @@ pub fn to_gleam_module(
         module.identifier.create("Identifier"),
       ))
       |> module.function_call.add(module.identifier.create(inner))
-      |> module.add_import(["surreal", "identifier"])
+      |> module.add_import(["suweal", "identifier"])
     Record(inner) ->
       module.function_call.create(module.binop.access(
         module.identifier.create("record"),
         module.identifier.create("Record"),
       ))
       |> module.function_call.add(module.identifier.create(inner))
-      |> module.add_import(["surreal", "record"])
+      |> module.add_import(["suweal", "record"])
     String ->
       case linked_enum {
         option.Some(enum) -> module.identifier.create(enum)
@@ -147,7 +147,7 @@ pub fn to_gleam_module(
         module.identifier.create("Option"),
       ))
       |> module.function_call.add(to_gleam_module(inner, linked_enum))
-      |> module.add_import(["surreal", "identifier"])
+      |> module.add_import(["suweal", "identifier"])
       |> module.add_import(["gleam", "option"])
     Array(inner) ->
       module.function_call.create(module.identifier.create("List"))
@@ -157,14 +157,14 @@ pub fn to_gleam_module(
         module.identifier.create("point"),
         module.identifier.create("Point"),
       )
-      |> module.add_import(["surreal", "point"])
+      |> module.add_import(["suweal", "point"])
     None -> module.identifier.create("Nil")
     Object ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
         module.identifier.create("SurrealQL"),
       )
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
   }
 }
 
@@ -192,21 +192,21 @@ pub fn value_to_gleam_module(
       )
       |> module.add_import(["gleam", "time", "timestamp"])
       |> module.add_import(["gleam", "time", "calendar"])
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     Int ->
       module.function_call.create(module.binop.access(
         module.identifier.create("surreal_ql"),
         module.identifier.create("Int"),
       ))
       |> module.function_call.add(module.identifier.create(name))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     Float ->
       module.function_call.create(module.binop.access(
         module.identifier.create("surreal_ql"),
         module.identifier.create("Float"),
       ))
       |> module.function_call.add(module.identifier.create(name))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     Identifier(_) ->
       module.function_call.create(module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -219,8 +219,8 @@ pub fn value_to_gleam_module(
         ))
         |> module.function_call.add(module.identifier.create(name)),
       )
-      |> module.add_import(["surreal_ql"])
-      |> module.add_import(["surreal", "identifier"])
+      |> module.add_import(["suweal", "surreal_ql"])
+      |> module.add_import(["suweal", "identifier"])
     Record(_) ->
       module.function_call.create(module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -236,8 +236,8 @@ pub fn value_to_gleam_module(
           module.identifier.create("id"),
         )),
       )
-      |> module.add_import(["surreal_ql"])
-      |> module.add_import(["surreal", "identifier"])
+      |> module.add_import(["suweal", "surreal_ql"])
+      |> module.add_import(["suweal", "identifier"])
     String ->
       case linked_enum {
         option.Some(enum) ->
@@ -255,14 +255,14 @@ pub fn value_to_gleam_module(
             ))
             |> module.function_call.add(module.identifier.create(name)),
           )
-          |> module.add_import(["surreal_ql"])
+          |> module.add_import(["suweal", "surreal_ql"])
         option.None ->
           module.function_call.create(module.binop.access(
             module.identifier.create("surreal_ql"),
             module.identifier.create("String"),
           ))
           |> module.function_call.add(module.identifier.create(name))
-          |> module.add_import(["surreal_ql"])
+          |> module.add_import(["suweal", "surreal_ql"])
       }
     Bool ->
       module.function_call.create(module.binop.access(
@@ -270,7 +270,7 @@ pub fn value_to_gleam_module(
         module.identifier.create("Bool"),
       ))
       |> module.function_call.add(module.identifier.create(name))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     Option(inner) ->
       module.function_call.create(module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -286,7 +286,7 @@ pub fn value_to_gleam_module(
           "value",
         )),
       )
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     Array(inner) ->
       module.function_call.create(module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -302,20 +302,20 @@ pub fn value_to_gleam_module(
           "value",
         )),
       )
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     Point ->
       module.function_call.create(module.binop.access(
         module.identifier.create("point"),
         module.identifier.create("to_surql"),
       ))
       |> module.function_call.add(module.identifier.create(name))
-      |> module.add_import(["surreal", "point"])
+      |> module.add_import(["suweal", "point"])
     Object -> module.identifier.create(name)
     None ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
         module.identifier.create("None"),
       )
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
   }
 }

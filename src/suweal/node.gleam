@@ -328,19 +328,19 @@ fn surreal_type_to_module(type_: surreal_type.SurrealType) -> module.Module {
         module.identifier.create("surreal_type"),
         module.identifier.create("Int"),
       )
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.String ->
       module.binop.access(
         module.identifier.create("surreal_type"),
         module.identifier.create("String"),
       )
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Float ->
       module.binop.access(
         module.identifier.create("surreal_type"),
         module.identifier.create("Float"),
       )
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Identifier(name) ->
       module.binop.access(
         module.identifier.create("surreal_type"),
@@ -348,7 +348,7 @@ fn surreal_type_to_module(type_: surreal_type.SurrealType) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.string(name))
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Record(name) ->
       module.binop.access(
         module.identifier.create("surreal_type"),
@@ -356,19 +356,19 @@ fn surreal_type_to_module(type_: surreal_type.SurrealType) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.string(name))
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Datetime ->
       module.binop.access(
         module.identifier.create("surreal_type"),
         module.identifier.create("Datetime"),
       )
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Bool ->
       module.binop.access(
         module.identifier.create("surreal_type"),
         module.identifier.create("Bool"),
       )
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Option(inner) ->
       module.binop.access(
         module.identifier.create("surreal_type"),
@@ -376,7 +376,7 @@ fn surreal_type_to_module(type_: surreal_type.SurrealType) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(surreal_type_to_module(inner))
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Array(inner) ->
       module.binop.access(
         module.identifier.create("surreal_type"),
@@ -384,25 +384,25 @@ fn surreal_type_to_module(type_: surreal_type.SurrealType) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(surreal_type_to_module(inner))
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Point ->
       module.binop.access(
         module.identifier.create("surreal_type"),
         module.identifier.create("Point"),
       )
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.Object ->
       module.binop.access(
         module.identifier.create("surreal_type"),
         module.identifier.create("Object"),
       )
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
     surreal_type.None ->
       module.binop.access(
         module.identifier.create("surreal_type"),
         module.identifier.create("None"),
       )
-      |> module.add_import(["surreal_type"])
+      |> module.add_import(["suweal", "surreal_type"])
   }
 }
 
@@ -504,7 +504,7 @@ fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.string(value))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     surreal_ql.Int(value) ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -512,7 +512,7 @@ fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.int(value))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     surreal_ql.Float(value) ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -520,7 +520,7 @@ fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.float(value))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     surreal_ql.Bool(value) ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -528,7 +528,7 @@ fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.bool(value))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     surreal_ql.Datetime(value) ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -536,13 +536,13 @@ fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.string(value))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     surreal_ql.Null ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
         module.identifier.create("Null"),
       )
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     surreal_ql.Object(value) ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -559,7 +559,7 @@ fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
           }),
         ),
       )
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     surreal_ql.Raw(value) ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -567,7 +567,7 @@ fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.string(value))
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
     surreal_ql.Array(values) ->
       module.binop.access(
         module.identifier.create("surreal_ql"),
@@ -577,7 +577,7 @@ fn surreal_value_to_module(value: surreal_ql.SurrealQL) -> module.Module {
       |> module.function_call.add(
         module.literal.list(list.map(values, surreal_value_to_module)),
       )
-      |> module.add_import(["surreal_ql"])
+      |> module.add_import(["suweal", "surreal_ql"])
   }
 }
 
@@ -624,7 +624,7 @@ pub fn to_module(node: Node) -> module.Module {
         to_module(permissions),
       )
       |> module.function_call.add_with_alias("as_", option_of(as_, to_module))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     DefineRelationTable(name:, schemafull:, permissions:, in:, out:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -645,7 +645,7 @@ pub fn to_module(node: Node) -> module.Module {
       )
       |> module.function_call.add_with_alias("in", module.literal.string(in))
       |> module.function_call.add_with_alias("out", module.literal.string(out))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     DefineField(
       name:,
       table:,
@@ -685,7 +685,7 @@ pub fn to_module(node: Node) -> module.Module {
         "flexible",
         module.literal.bool(flexible),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     DefineIndex(name:, table:, fields:, unique:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -708,7 +708,7 @@ pub fn to_module(node: Node) -> module.Module {
         "unique",
         module.literal.bool(unique),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     FunctionCall(lhs:, rhs:, arguments:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -724,31 +724,31 @@ pub fn to_module(node: Node) -> module.Module {
         "arguments",
         module.literal.list(list.map(arguments, to_module)),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Self ->
       module.binop.access(
         module.identifier.create("node"),
         module.identifier.create("Self"),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     None ->
       module.binop.access(
         module.identifier.create("node"),
         module.identifier.create("None"),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Full ->
       module.binop.access(
         module.identifier.create("node"),
         module.identifier.create("Full"),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     All ->
       module.binop.access(
         module.identifier.create("node"),
         module.identifier.create("All"),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Number(value) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -756,7 +756,7 @@ pub fn to_module(node: Node) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.float(value))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Parameter(value) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -764,7 +764,7 @@ pub fn to_module(node: Node) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.string(value))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Identifier(value) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -772,7 +772,7 @@ pub fn to_module(node: Node) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(module.literal.string(value))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Value(value) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -780,7 +780,7 @@ pub fn to_module(node: Node) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add(surreal_value_to_module(value))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Object(fields) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -795,7 +795,7 @@ pub fn to_module(node: Node) -> module.Module {
           }),
         ),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Array(fields) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -805,7 +805,7 @@ pub fn to_module(node: Node) -> module.Module {
       |> module.function_call.add(
         module.literal.list(list.map(fields, to_module)),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Select(fields:, only:, table:, where:, order:, limit:, group_all:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -873,7 +873,7 @@ pub fn to_module(node: Node) -> module.Module {
         "group_all",
         module.literal.bool(group_all),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     BinaryOperator(lhs:, operator:, rhs:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -904,7 +904,7 @@ pub fn to_module(node: Node) -> module.Module {
         ),
       )
       |> module.function_call.add_with_alias("rhs", to_module(rhs))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     If(condition:, then_:, else_:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -914,7 +914,7 @@ pub fn to_module(node: Node) -> module.Module {
       |> module.function_call.add_with_alias("condition", to_module(condition))
       |> module.function_call.add_with_alias("then_", to_module(then_))
       |> module.function_call.add_with_alias("else_", to_module(else_))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     WrappedNode(node) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -922,7 +922,7 @@ pub fn to_module(node: Node) -> module.Module {
       )
       |> module.function_call.create()
       |> module.function_call.add_with_alias("node", to_module(node))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Update(target:, set:, where:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -941,7 +941,7 @@ pub fn to_module(node: Node) -> module.Module {
         "where",
         option_of(where, to_module),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Create(target:, set:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -956,7 +956,7 @@ pub fn to_module(node: Node) -> module.Module {
         "set",
         module.literal.list(list.map(set, to_module)),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Relate(table:, from:, to:, set:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -973,7 +973,7 @@ pub fn to_module(node: Node) -> module.Module {
         "set",
         module.literal.list(list.map(set, to_module)),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Lambda(parameters:, body:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -985,7 +985,7 @@ pub fn to_module(node: Node) -> module.Module {
         module.literal.list(list.map(parameters, module.literal.string)),
       )
       |> module.function_call.add_with_alias("body", to_module(body))
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
     Delete(target:, where:) ->
       module.binop.access(
         module.identifier.create("node"),
@@ -997,6 +997,6 @@ pub fn to_module(node: Node) -> module.Module {
         "where",
         option_of(where, to_module),
       )
-      |> module.add_import(["surreal", "node"])
+      |> module.add_import(["suweal", "node"])
   }
 }
